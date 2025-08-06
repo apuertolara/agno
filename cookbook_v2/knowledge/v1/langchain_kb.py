@@ -36,7 +36,7 @@ db = Chroma(embedding_function=OpenAIEmbeddings(), persist_directory=str(chroma_
 retriever = db.as_retriever()
 
 # Create a knowledge base from the vector store
-knowledge_base = LangChainKnowledgeBase(retriever=retriever)
+knowledge_base = LangChainKnowledgeBase(knowledge_retriever=retriever)
 
 # Create an agent with the knowledge base
 agent = Agent(knowledge=knowledge_base)

@@ -67,7 +67,7 @@ def main():
     # Remember to set search_knowledge=True to use agentic_rag or add_reference=True for traditional RAG
     # search_knowledge=True is default when you add a knowledge base but is needed here
     agent = Agent(
-        retriever=retriever,
+        knowledge_retriever=retriever,
         search_knowledge=True,
         instructions="Search the knowledge base for information",
     )

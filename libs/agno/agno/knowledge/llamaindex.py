@@ -14,7 +14,7 @@ except ImportError:
 
 
 class LlamaIndexKnowledgeBase(AgentKnowledge):
-    retriever: BaseRetriever
+    knowledge_retriever: BaseRetriever
     loader: Optional[Callable] = None
 
     def search(
@@ -31,12 +31,12 @@ class LlamaIndexKnowledgeBase(AgentKnowledge):
         Returns:
             List[Document]: A list of relevant documents matching the query.
         Raises:
-            ValueError: If the retriever is not of type BaseRetriever.
+            ValueError: If the knowledge_retriever is not of type BaseRetriever.
         """
-        if not isinstance(self.retriever, BaseRetriever):
-            raise ValueError(f"Retriever is not of type BaseRetriever: {self.retriever}")
+        if not isinstance(self.knowledge_retriever, BaseRetriever):
+            raise ValueError(f"Knowledge retriever is not of type BaseRetriever: {self.knowledge_retriever}")
 
-        lc_documents: List[NodeWithScore] = self.retriever.retrieve(query)
+        lc_documents: List[NodeWithScore] = self.knowledge_retriever.retrieve(query)
         if num_documents is not None:
             lc_documents = lc_documents[:num_documents]
         documents = []

@@ -45,7 +45,7 @@ index = VectorStoreIndex(nodes=nodes, storage_context=storage_context)
 retriever = VectorIndexRetriever(index)
 
 # Create a knowledge base from the vector store
-knowledge_base = LlamaIndexKnowledgeBase(retriever=retriever)
+knowledge_base = LlamaIndexKnowledgeBase(knowledge_retriever=retriever)
 
 # Create an agent with the knowledge base
 agent = Agent(

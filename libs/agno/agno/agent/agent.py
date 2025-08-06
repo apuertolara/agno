@@ -163,9 +163,9 @@ class Agent:
     # Retrieval function to get references
     # This function, if provided, is used instead of the default search_knowledge function
     # Signature:
-    # def retriever(agent: Agent, query: str, num_documents: Optional[int], **kwargs) -> Optional[list[dict]]:
+    # def knowledge_retriever(agent: Agent, query: str, num_documents: Optional[int], **kwargs) -> Optional[list[dict]]:
     #     ...
-    retriever: Optional[Callable[..., Optional[List[Union[Dict, str]]]]] = None
+    knowledge_retriever: Optional[Callable[..., Optional[List[Union[Dict, str]]]]] = None
     references_format: Literal["json", "yaml"] = "json"
 
     # --- Agent Tools ---
@@ -353,7 +353,7 @@ class Agent:
         knowledge_filters: Optional[Dict[str, Any]] = None,
         enable_agentic_knowledge_filters: Optional[bool] = None,
         add_references: bool = False,
-        retriever: Optional[Callable[..., Optional[List[Union[Dict, str]]]]] = None,
+        knowledge_retriever: Optional[Callable[..., Optional[List[Union[Dict, str]]]]] = None,
         references_format: Literal["json", "yaml"] = "json",
         extra_data: Optional[Dict[str, Any]] = None,
         tools: Optional[List[Union[Toolkit, Callable, Function, Dict]]] = None,
@@ -440,7 +440,7 @@ class Agent:
         self.knowledge_filters = knowledge_filters
         self.enable_agentic_knowledge_filters = enable_agentic_knowledge_filters
         self.add_references = add_references
-        self.retriever = retriever
+        self.knowledge_retriever = knowledge_retriever
         self.references_format = references_format
 
         self.extra_data = extra_data
@@ -3425,13 +3425,13 @@ class Agent:
             self._rebuild_tools = True
 
         # Add tools for accessing knowledge
-        if self.knowledge is not None or self.retriever is not None:
-            # Check if retriever is an async function but used in sync mode
+        if self.knowledge is not None or self.knowledge_retriever is not None:
+            # Check if knowledge_retriever is an async function but used in sync mode
             from inspect import iscoroutinefunction
 
-            if not async_mode and self.retriever and iscoroutinefunction(self.retriever):
+            if not async_mode and self.knowledge_retriever and iscoroutinefunction(self.knowledge_retriever):
                 log_warning(
-                    "Async retriever function is being used with synchronous agent.run() or agent.print_response(). "
+                    "Async knowledge_retriever function is being used with synchronous agent.run() or agent.print_response(). "
                     "It is recommended to use agent.arun() or agent.aprint_response() instead."
                 )
 
@@ -4726,20 +4726,20 @@ class Agent:
                 if not filters:
                     log_warning("No valid filters remain after validation. Search will proceed without filters.")
 
-        if self.retriever is not None and callable(self.retriever):
+        if self.knowledge_retriever is not None and callable(self.knowledge_retriever):
             from inspect import signature
 
             try:
-                sig = signature(self.retriever)
+                sig = signature(self.knowledge_retriever)
                 retriever_kwargs: Dict[str, Any] = {}
                 if "agent" in sig.parameters:
                     retriever_kwargs = {"agent": self}
                 if "filters" in sig.parameters:
                     retriever_kwargs["filters"] = filters
                 retriever_kwargs.update({"query": query, "num_documents": num_documents, **kwargs})
-                return self.retriever(**retriever_kwargs)
+                return self.knowledge_retriever(**retriever_kwargs)
             except Exception as e:
-                log_warning(f"Retriever failed: {e}")
+                log_warning(f"Knowledge retriever failed: {e}")
                 raise e
 
         # Use knowledge base search
@@ -4789,25 +4789,25 @@ class Agent:
                 if not filters:
                     log_warning("No valid filters remain after validation. Search will proceed without filters.")
 
-        if self.retriever is not None and callable(self.retriever):
+        if self.knowledge_retriever is not None and callable(self.knowledge_retriever):
             from inspect import isawaitable, signature
 
             try:
-                sig = signature(self.retriever)
+                sig = signature(self.knowledge_retriever)
                 retriever_kwargs: Dict[str, Any] = {}
                 if "agent" in sig.parameters:
                     retriever_kwargs = {"agent": self}
                 if "filters" in sig.parameters:
                     retriever_kwargs["filters"] = filters
                 retriever_kwargs.update({"query": query, "num_documents": num_documents, **kwargs})
-                result = self.retriever(**retriever_kwargs)
+                result = self.knowledge_retriever(**retriever_kwargs)
 
                 if isawaitable(result):
                     result = await result
 
                 return result
             except Exception as e:
-                log_warning(f"Retriever failed: {e}")
+                log_warning(f"Knowledge retriever failed: {e}")
                 raise e
 
         # Use knowledge base search

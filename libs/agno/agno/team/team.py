@@ -186,9 +186,9 @@ class Team:
     # Retrieval function to get references
     # This function, if provided, is used instead of the default search_knowledge function
     # Signature:
-    # def retriever(team: Team, query: str, num_documents: Optional[int], **kwargs) -> Optional[list[dict]]:
+    # def knowledge_retriever(team: Team, query: str, num_documents: Optional[int], **kwargs) -> Optional[list[dict]]:
     #     ...
-    retriever: Optional[Callable[..., Optional[List[Union[Dict, str]]]]] = None
+    knowledge_retriever: Optional[Callable[..., Optional[List[Union[Dict, str]]]]] = None
     references_format: Literal["json", "yaml"] = "json"
 
     # --- Tools ---
@@ -328,7 +328,7 @@ class Team:
         knowledge_filters: Optional[Dict[str, Any]] = None,
         add_references: bool = False,
         enable_agentic_knowledge_filters: Optional[bool] = False,
-        retriever: Optional[Callable[..., Optional[List[Union[Dict, str]]]]] = None,
+        knowledge_retriever: Optional[Callable[..., Optional[List[Union[Dict, str]]]]] = None,
         references_format: Literal["json", "yaml"] = "json",
         enable_agentic_context: bool = False,
         share_member_interactions: bool = False,
@@ -406,7 +406,7 @@ class Team:
         self.knowledge_filters = knowledge_filters
         self.enable_agentic_knowledge_filters = enable_agentic_knowledge_filters
         self.add_references = add_references
-        self.retriever = retriever
+        self.knowledge_retriever = knowledge_retriever
         self.references_format = references_format
 
         self.enable_agentic_context = enable_agentic_context
@@ -4698,13 +4698,13 @@ class Team:
         if self.enable_agentic_context:
             _tools.append(self.get_set_shared_context_function(session_id=session_id))
 
-        if self.knowledge is not None or self.retriever is not None:
-            # Check if retriever is an async function but used in sync mode
+        if self.knowledge is not None or self.knowledge_retriever is not None:
+            # Check if knowledge_retriever is an async function but used in sync mode
             from inspect import iscoroutinefunction
 
-            if self.retriever is not None and iscoroutinefunction(self.retriever):
+            if self.knowledge_retriever is not None and iscoroutinefunction(self.knowledge_retriever):
                 log_warning(
-                    "Async retriever function is being used with synchronous agent.run() or agent.print_response(). "
+                    "Async knowledge_retriever function is being used with synchronous agent.run() or agent.print_response(). "
                     "It is recommended to use agent.arun() or agent.aprint_response() instead."
                 )
 
@@ -7280,20 +7280,20 @@ class Team:
                 if not filters:
                     log_warning("No valid filters remain after validation. Search will proceed without filters.")
 
-        if self.retriever is not None and callable(self.retriever):
+        if self.knowledge_retriever is not None and callable(self.knowledge_retriever):
             from inspect import signature
 
             try:
-                sig = signature(self.retriever)
+                sig = signature(self.knowledge_retriever)
                 retriever_kwargs: Dict[str, Any] = {}
                 if "team" in sig.parameters:
                     retriever_kwargs = {"team": self}
                 if "filters" in sig.parameters:
                     retriever_kwargs["filters"] = filters
                 retriever_kwargs.update({"query": query, "num_documents": num_documents, **kwargs})
-                return self.retriever(**retriever_kwargs)
+                return self.knowledge_retriever(**retriever_kwargs)
             except Exception as e:
-                log_warning(f"Retriever failed: {e}")
+                log_warning(f"Knowledge retriever failed: {e}")
                 raise e
         try:
             if self.knowledge is None or self.knowledge.vector_db is None:
@@ -7338,20 +7338,20 @@ class Team:
                 if not filters:
                     log_warning("No valid filters remain after validation. Search will proceed without filters.")
 
-        if self.retriever is not None and callable(self.retriever):
+        if self.knowledge_retriever is not None and callable(self.knowledge_retriever):
             from inspect import signature
 
             try:
-                sig = signature(self.retriever)
+                sig = signature(self.knowledge_retriever)
                 retriever_kwargs: Dict[str, Any] = {}
                 if "team" in sig.parameters:
                     retriever_kwargs = {"team": self}
                 if "filters" in sig.parameters:
                     retriever_kwargs["filters"] = filters
                 retriever_kwargs.update({"query": query, "num_documents": num_documents, **kwargs})
-                return self.retriever(**retriever_kwargs)
+                return self.knowledge_retriever(**retriever_kwargs)
             except Exception as e:
-                log_warning(f"Retriever failed: {e}")
+                log_warning(f"Knowledge retriever failed: {e}")
                 raise e
 
         try:

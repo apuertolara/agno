@@ -25,7 +25,7 @@ agent = Agent(
     model=Claude(id="claude-3-7-sonnet-latest"),
     # Agentic RAG is enabled by default when `knowledge` is provided to the Agent.
     knowledge=knowledge_base,
-    retriever=lightrag_retriever,
+    knowledge_retriever=lightrag_retriever,
     # search_knowledge=True gives the Agent the ability to search on demand
     # search_knowledge is True by default
     search_knowledge=True,

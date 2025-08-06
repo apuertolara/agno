@@ -8,7 +8,7 @@ def test_agent_with_custom_retriever():
 
     agent = Agent(
         model=OpenAIChat(id="gpt-4o"),
-        retriever=custom_retriever,
+        knowledge_retriever=custom_retriever,
         add_references=True,
     )
     response = agent.run("What is the capital of France?")
@@ -22,7 +22,7 @@ def test_agent_with_custom_retriever_error():
 
     agent = Agent(
         model=OpenAIChat(id="gpt-4o"),
-        retriever=custom_retriever,
+        knowledge_retriever=custom_retriever,
         add_references=True,
     )
     response = agent.run("What is the capital of France?")
@@ -36,7 +36,7 @@ def test_agent_with_custom_retriever_search_knowledge_error():
 
     agent = Agent(
         model=OpenAIChat(id="gpt-4o"),
-        retriever=custom_retriever,
+        knowledge_retriever=custom_retriever,
         search_knowledge=True,
         debug_mode=True,
     )
