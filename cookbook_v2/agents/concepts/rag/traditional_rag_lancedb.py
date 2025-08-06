@@ -27,8 +27,8 @@ knowledge.add_content(
 agent = Agent(
     model=OpenAIChat(id="gpt-4o"),
     knowledge=knowledge,
-    # Enable RAG by adding references from Knowledge to the user prompt.
-    add_references=True,
+    # Enable RAG by adding knowledge from Knowledge to the user prompt context.
+    add_knowledge_to_context=True,
     # Set as False because Agents default to `search_knowledge=True`
     search_knowledge=False,
     markdown=True,
